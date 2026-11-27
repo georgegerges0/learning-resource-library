@@ -8,6 +8,7 @@ import Profile from './pages/Profile';
 import AdminResources from './pages/AdminResources';
 import Catalogue from './pages/Catalogue';
 import ResourceDetail from './pages/ResourceDetail';
+import MyLibrary from './pages/MyLibrary';
 
 function App() {
   return (
@@ -46,6 +47,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ResourceDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-library"
+            element={
+              <ProtectedRoute>
+                <MyLibrary />
               </ProtectedRoute>
             }
           />

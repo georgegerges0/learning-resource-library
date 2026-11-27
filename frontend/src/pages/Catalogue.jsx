@@ -8,23 +8,38 @@ const Catalogue = () => {
   const [studyArea, setStudyArea] = useState('All');
   const [format, setFormat] = useState('All');
   const [resources, setResources] = useState([]);
+  const [savedIds, setSavedIds] = useState(() => new Set());
+  const [savingId, setSavingId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [feedback, setFeedback] = useState(null);
 
   const fetchCatalogue = useCallback(async (params) => {
     setLoading(true);
-    setErrorMessage('');
     try {
       const response = await axiosInstance.get('/api/resources', { params });
       setResources(response.data);
     } catch (error) {
-      setErrorMessage(
-        error.response?.data?.message || 'Unable to load catalogue results. Please try again.'
-      );
+      setFeedback({
+        type: 'error',
+        text: error.response?.data?.message || 'Unable to load catalogue results. Please try again.',
+      });
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const fetchSavedIds = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get('/api/bookmarks');
+      setSavedIds(new Set(response.data.map((b) => String(b.resourceId))));
+    } catch (_) {
+      // Non-blocking bookmark state fetch
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSavedIds();
+  }, [fetchSavedIds]);
 
   useEffect(() => {
     const queryParams = {};
@@ -33,6 +48,32 @@ const Catalogue = () => {
     if (format !== 'All') queryParams.format = format;
     fetchCatalogue(queryParams);
   }, [keyword, studyArea, format, fetchCatalogue]);
+
+  const handleSaveResource = async (resource) => {
+    setSavingId(resource._id);
+    setFeedback(null);
+    try {
+      await axiosInstance.post('/api/bookmarks', { resourceId: resource._id });
+      setSavedIds((prev) => {
+        const next = new Set(prev);
+        next.add(String(resource._id));
+        return next;
+      });
+      setFeedback({
+        type: 'success',
+        text: `Saved "${resource.title}" to My Library.`,
+      });
+    } catch (error) {
+      setFeedback({
+        type: 'error',
+        text:
+          error.response?.data?.message ||
+          `Could not save "${resource.title}". Your selection is retained—please retry.`,
+      });
+    } finally {
+      setSavingId(null);
+    }
+  };
 
   const handleResetFilters = () => {
     setKeyword('');
@@ -54,7 +95,6 @@ const Catalogue = () => {
         </p>
       </div>
 
-      {/* Search & Combined Filters Bar */}
       <section
         aria-label="Catalogue search and filters"
         className="bg-white border border-slate-200 rounded-lg shadow-sm p-5 mb-6"
@@ -131,12 +171,17 @@ const Catalogue = () => {
         </div>
       </section>
 
-      {errorMessage && (
+      {feedback && (
         <div
-          role="alert"
-          className="mb-6 p-4 rounded-md bg-red-50 border border-red-200 text-sm text-red-800"
+          role={feedback.type === 'error' ? 'alert' : 'status'}
+          aria-live="polite"
+          className={`mb-6 p-4 rounded-md border text-sm ${
+            feedback.type === 'error'
+              ? 'bg-red-50 border-red-200 text-red-800'
+              : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+          }`}
         >
-          {errorMessage}
+          {feedback.text}
         </div>
       )}
 
@@ -161,7 +206,13 @@ const Catalogue = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {resources.map((resource) => (
-            <ResourceCard key={resource._id} resource={resource} />
+            <ResourceCard
+              key={resource._id}
+              resource={resource}
+              isSaved={savedIds.has(String(resource._id))}
+              saving={savingId === resource._id}
+              onSave={handleSaveResource}
+            />
           ))}
         </div>
       )}
