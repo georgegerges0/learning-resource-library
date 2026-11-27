@@ -1,17 +1,18 @@
 {
-  "name": "task-manager",
+  "name": "kadidjiny-library",
   "version": "1.0.0",
-  "description": "Complete MERN Task Manager Application",
+  "description": "Kadidjiny Library — Learning Resource Library (IFQ636 Assignment 1)",
   "scripts": {
-    "install-all": "npm install && npm install --prefix backend && npm install --prefix frontend",
+    "install-all": "npm install && npm install --prefix backend && npm install --prefix frontend --legacy-peer-deps",
     "start": "concurrently \"npm run prod --prefix backend\" \"npm start --prefix frontend\"",
-    "dev": "concurrently \"npm run dev --prefix backend\" \"npm start --prefix frontend\""
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm start --prefix frontend\"",
+    "test": "npm test --prefix backend",
+    "build": "npm run build --prefix frontend",
+    "seed": "npm run seed --prefix backend"
   },
   "devDependencies": {
-    "chai": "^5.1.2",
-    "concurrently": "^7.0.0",
-    "mocha": "^11.0.1"
+    "concurrently": "^7.0.0"
   },
-  "author": "Task Manager Team",
+  "author": "George Gerges",
   "license": "ISC"
 }
