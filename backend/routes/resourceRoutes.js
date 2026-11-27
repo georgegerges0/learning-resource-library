@@ -1,7 +1,8 @@
 const express = require('express');
 const { protect, requireAdmin } = require('../middleware/authMiddleware');
 const {
-  getPublishedCatalogueStub,
+  searchPublishedCatalogue,
+  getPublishedResourceDetail,
   getManagedResources,
   createResource,
   updateResource,
@@ -10,8 +11,9 @@ const {
 
 const router = express.Router();
 
-router.get('/', protect, getPublishedCatalogueStub);
+router.get('/', protect, searchPublishedCatalogue);
 router.get('/manage', protect, requireAdmin, getManagedResources);
+router.get('/:id', protect, getPublishedResourceDetail);
 router.post('/', protect, requireAdmin, createResource);
 router.put('/:id', protect, requireAdmin, updateResource);
 router.patch('/:id/publish', protect, requireAdmin, publishResource);
