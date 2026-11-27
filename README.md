@@ -102,51 +102,55 @@ npm test
 
 ## University-Provided AWS EC2 Manual Deployment Procedure
 
-> **Important**: Deploy only to the university-provided AWS EC2 instance (not a personal AWS account). No secrets are stored in Git.
+> **Important**: Deployed exclusively to the university-provided AWS EC2 instance **`GG-2` (`i-0086596edae15d375`)** in `ap-southeast-2`. No secrets are committed to Git.
 
-1. **Verify EC2 Instance, Subnet & Security Group**:
-   - Confirm the assigned university EC2 instance is in the designated public subnet with its university IAM instance profile attached.
-   - Verify Security Group inbound rules allow:
-     - `SSH (TCP 22)` restricted to your workstation IP / QUT access range.
-     - Application HTTP port (`TCP 5001` or `TCP 80` via Nginx reverse proxy) open for marking verification; keep MongoDB (`TCP 27017`) bound strictly to `127.0.0.1` (never publicly exposed).
+1. **Instance, IAM Role, Subnet & Security Group Hygiene**:
+   - **Instance**: `GG-2` (`i-0086596edae15d375`, `t3.medium`, Ubuntu 26.04, Public Subnet `subnet-046ffe3e1ed93b6c1`, IAM Instance Profile `IFQ636-EC2-Role`).
+   - **Inbound Access**: Managed via **AWS Systems Manager (SSM) Session Manager** (no public SSH port `22` required). Public inbound access is restricted to `HTTP (TCP 80)` / `HTTPS (TCP 443)` via Nginx reverse proxy (`sg-0163d4784e5d3620d`); Express (`127.0.0.1:5001`) and MongoDB (`127.0.0.1:27017`) bind strictly to loopback and are not publicly exposed.
 
-2. **Install Runtime & Clone Release Tag on EC2**:
+2. **Install Runtime, Nginx & Local Loopback MongoDB via SSM Session Manager**:
+   - Open **EC2 → Instances → `GG-2` → Connect → Session Manager**.
+   - Install `git`, `nodejs`, `npm`, `nginx`, and run `mongod` (`8.0.4`) as systemd unit `kadidjiny-mongo.service` bound to `127.0.0.1:27017` (`--bind_ip 127.0.0.1`).
+
+3. **Clone Release, Build Production Bundle in `/dev/shm` & Configure `.env`**:
+   Because the university root EBS volume is 6.7 GB (and MongoDB enforces a 500 MiB minimum free-disk safety threshold), compile the static React bundle in RAM-backed `/dev/shm` (`tmpfs`) and copy only the compiled `build/` artefacts into `/opt/kadidjiny-library/frontend/build`:
    ```bash
-   ssh -i <university-key.pem> ubuntu@<EC2_PUBLIC_IP>
-   git clone https://github.com/georgegerges0/learning-resource-library.git
-   cd learning-resource-library
-   git checkout v1.0.0
-   npm run install-all
-   ```
+   sudo git clone https://github.com/georgegerges0/learning-resource-library.git /opt/kadidjiny-library
+   cd /opt/kadidjiny-library && sudo git checkout v1.0.2
+   sudo npm install --prefix backend
 
-3. **Configure Production Environment & Build Frontend**:
-   When `NODE_ENV=production` and `frontend/build` exists, `backend/server.js` serves both the compiled React SPA and `/api/*` from the same origin, eliminating cross-origin browser issues:
-   ```bash
-   cat > frontend/.env <<EOF
-   REACT_APP_API_URL=http://<EC2_PUBLIC_IP>:5001
-   EOF
-   npm run build
+   # Build static React bundle in tmpfs to keep root EBS disk lean
+   cp -R frontend /dev/shm/kadidjiny-frontend
+   npm install --prefix /dev/shm/kadidjiny-frontend --legacy-peer-deps
+   CI=false npm run build --prefix /dev/shm/kadidjiny-frontend
+   sudo rm -rf /opt/kadidjiny-library/frontend/build
+   sudo mv /dev/shm/kadidjiny-frontend/build /opt/kadidjiny-library/frontend/build
+   rm -rf /dev/shm/kadidjiny-frontend
 
-   cat > backend/.env <<EOF
+   # Create runtime backend/.env (chmod 600, gitignored)
+   sudo tee /opt/kadidjiny-library/backend/.env >/dev/null <<EOF
    NODE_ENV=production
    PORT=5001
-   MONGO_URI=<MONGODB_CONNECTION_STRING>
-   JWT_SECRET=$(openssl rand -base64 32)
-   CLIENT_ORIGIN=http://<EC2_PUBLIC_IP>:5001
+   MONGO_URI=mongodb://127.0.0.1:27017/kadidjiny_library
+   JWT_SECRET=$(openssl rand -base64 36 | tr -d '\n')
+   CLIENT_ORIGIN=http://13.239.32.83,http://ec2-13-239-32-83.ap-southeast-2.compute.amazonaws.com
    EOF
-   chmod 600 backend/.env
+   sudo chmod 600 /opt/kadidjiny-library/backend/.env
    ```
 
-4. **Seed Data & Run Persistent Service (`PM2`)**:
+4. **Seed Database, Start PM2 Service & Configure Nginx (`TCP 80` → `127.0.0.1:5001`)**:
    ```bash
-   npm run seed
-   npx pm2 start backend/server.js --name kadidjiny-library
-   npx pm2 save
+   sudo npm run seed --prefix /opt/kadidjiny-library/backend
+   sudo npm install -g pm2
+   sudo NODE_ENV=production pm2 start /opt/kadidjiny-library/backend/server.js --name kadidjiny-library --cwd /opt/kadidjiny-library/backend
+   sudo pm2 startup systemd -u root --hp /root
+   sudo pm2 save
    ```
+   Configure `/etc/nginx/sites-available/default` to `proxy_pass http://127.0.0.1:5001;` on port `80` and run `sudo nginx -t && sudo systemctl reload nginx`.
 
 5. **Post-Deployment Verification (`T1`–`T6`)**:
-   - Visit `http://<EC2_PUBLIC_IP>:5001/api/health` → confirm `{"status":"ok"}`.
-   - Sign in as Administrator (`admin@kadidjiny.edu.au`), publish a draft, sign in as Student (`student@kadidjiny.edu.au`) in a separate session, filter by Study Area + Format, save to `My Library`, run `npx pm2 restart kadidjiny-library` (`T6`), confirm persistence, then withdraw the item and verify removal across search, `My Library`, and direct detail URL (`T5`).
+   - `GET http://13.239.32.83/api/health` → `{"status":"ok","service":"Kadidjiny Library API"}` (`200 OK`).
+   - Verified Administrator (`admin@kadidjiny.edu.au` → 5 Published + 1 Draft in `/admin`) and Student (`student@kadidjiny.edu.au` → 5 Published in `/catalogue`, `Health + Video` combined filter = 1 match, persistent `My Library` bookmark across `pm2 restart kadidjiny-library`).
 
 ---
 
