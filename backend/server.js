@@ -22,6 +22,7 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/resources', require('./routes/resourceRoutes'));
+app.use('/api/bookmarks', require('./routes/bookmarkRoutes'));
 
 // Serve compiled React client when present in production deployments
 const frontendBuildPath = path.join(__dirname, '..', 'frontend', 'build');
