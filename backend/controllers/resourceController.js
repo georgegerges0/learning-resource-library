@@ -19,7 +19,7 @@ const searchPublishedCatalogue = async (req, res) => {
 
 const getPublishedResourceDetail = async (req, res) => {
   try {
-    const resource = await CatalogueQueryService.getResourceById(req.params.id);
+    const resource = await CatalogueQueryService.getPublishedResourceById(req.params.id);
     if (!resource) {
       return res.status(404).json({
         message: 'This resource is not available in the student catalogue.',

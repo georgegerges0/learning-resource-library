@@ -1,4 +1,7 @@
+const mongoose = require('mongoose');
 const Resource = require('../models/Resource');
+
+const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 class CatalogueQueryService {
   static async searchPublishedResources({ q = '', studyArea = '', format = '' } = {}) {
@@ -14,7 +17,7 @@ class CatalogueQueryService {
 
     const trimmedKeyword = String(q || '').trim();
     if (trimmedKeyword) {
-      const pattern = new RegExp(trimmedKeyword, 'i');
+      const pattern = new RegExp(escapeRegex(trimmedKeyword), 'i');
       query.$or = [
         { title: pattern },
         { description: pattern },
@@ -25,9 +28,13 @@ class CatalogueQueryService {
     return Resource.find(query).sort({ publishedAt: -1, updatedAt: -1 });
   }
 
-  static async getResourceById(id) {
-    return Resource.findById(id);
+  static async getPublishedResourceById(id) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return null;
+    }
+    return Resource.findOne({ _id: id, status: 'Published' });
   }
 }
 
 module.exports = CatalogueQueryService;
+module.exports.escapeRegex = escapeRegex;
