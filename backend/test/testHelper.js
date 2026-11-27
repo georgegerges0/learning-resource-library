@@ -1,14 +1,18 @@
 const mongoose = require('mongoose');
-mongoose.set('strictQuery', true);
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
+mongoose.set('strictQuery', true);
+
 let mongoServer;
+let activeSuites = 0;
 
 const setupTestDB = async () => {
   process.env.JWT_SECRET = process.env.JWT_SECRET || 'test_jwt_secret_kadidjiny_library_2026';
-  mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
-  await mongoose.connect(uri);
+  activeSuites += 1;
+  if (mongoose.connection.readyState === 0) {
+    mongoServer = await MongoMemoryServer.create();
+    await mongoose.connect(mongoServer.getUri());
+  }
 };
 
 const clearTestDB = async () => {
@@ -19,12 +23,14 @@ const clearTestDB = async () => {
 };
 
 const teardownTestDB = async () => {
-  if (mongoose.connection.readyState !== 0) {
+  activeSuites = Math.max(0, activeSuites - 1);
+  if (activeSuites === 0 && mongoose.connection.readyState !== 0) {
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
-  }
-  if (mongoServer) {
-    await mongoServer.stop();
+    if (mongoServer) {
+      await mongoServer.stop();
+      mongoServer = null;
+    }
   }
 };
 
