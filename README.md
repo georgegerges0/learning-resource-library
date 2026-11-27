@@ -8,8 +8,9 @@ Kadidjiny Library provides students with a single searchable catalogue of staff-
 
 ## Live Deployment URL (University EC2)
 
-- **Deployment URL**: `http://<UNIVERSITY_EC2_PUBLIC_IP>:5001` *(university-provided AWS EC2 instance; update public IP/hostname once deployed during the marking window)*
-- **Health Check Endpoint**: `GET /api/health`
+- **Deployment URL**: http://13.239.32.83 (`http://ec2-13-239-32-83.ap-southeast-2.compute.amazonaws.com`)
+- **University EC2 Instance**: `GG-2` (`i-0086596edae15d375`, `ap-southeast-2`, IAM Profile `IFQ636-EC2-Role`, Public Subnet `subnet-046ffe3e1ed93b6c1`)
+- **Health Check Endpoint**: http://13.239.32.83/api/health (`GET /api/health`)
 - **Jira Project**: `LRL` (`https://gg-qut.atlassian.net/jira/software/projects/LRL/boards/1`)
 
 ---
