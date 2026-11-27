@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 import StatusBadge from '../components/StatusBadge';
+import ArchiveModal from '../components/ArchiveModal';
 import { STUDY_AREAS, RESOURCE_FORMATS } from '../constants/catalogueOptions';
 
 const INITIAL_FORM = {
@@ -22,6 +23,7 @@ const AdminResources = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [feedback, setFeedback] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [archiveTarget, setArchiveTarget] = useState(null);
 
   const loadManagedResources = useCallback(async () => {
     setLoading(true);
@@ -147,6 +149,32 @@ const AdminResources = () => {
     }
   };
 
+  const handleConfirmArchive = async (item) => {
+    setSubmitting(true);
+    setFeedback(null);
+    try {
+      const response = await axiosInstance.patch(`/api/resources/${item._id}/archive`);
+      setResources((prev) =>
+        prev.map((r) => (r._id === response.data._id ? response.data : r))
+      );
+      if (editingId === item._id) {
+        setEditingStatus('Archived');
+      }
+      setArchiveTarget(null);
+      setFeedback({
+        type: 'success',
+        text: `Withdrew "${response.data.title}". It is now hidden from Student search, My Library and detail views.`,
+      });
+    } catch (error) {
+      setFeedback({
+        type: 'error',
+        text: error.response?.data?.message || 'Unable to archive resource.',
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <main className="max-w-6xl mx-auto px-4 py-8">
       <div className="mb-6 flex flex-wrap justify-between items-end gap-4">
@@ -258,6 +286,26 @@ const AdminResources = () => {
                             className="px-2.5 py-1 text-xs font-medium rounded bg-emerald-600 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600"
                           >
                             Publish
+                          </button>
+                        )}
+                        {item.status === 'Published' && (
+                          <button
+                            type="button"
+                            disabled={submitting}
+                            onClick={() => setArchiveTarget(item)}
+                            className="px-2.5 py-1 text-xs font-medium rounded border border-red-200 bg-red-50 text-red-800 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600"
+                          >
+                            Withdraw
+                          </button>
+                        )}
+                        {item.status === 'Archived' && (
+                          <button
+                            type="button"
+                            disabled={submitting}
+                            onClick={() => handleQuickPublish(item)}
+                            className="px-2.5 py-1 text-xs font-medium rounded border border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                          >
+                            Republish
                           </button>
                         )}
                       </td>
@@ -472,6 +520,12 @@ const AdminResources = () => {
           </div>
         </section>
       </div>
+      <ArchiveModal
+        resource={archiveTarget}
+        submitting={submitting}
+        onCancel={() => setArchiveTarget(null)}
+        onConfirm={handleConfirmArchive}
+      />
     </main>
   );
 };
