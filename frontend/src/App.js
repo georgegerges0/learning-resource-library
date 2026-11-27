@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import AdminResources from './pages/AdminResources';
+import Catalogue from './pages/Catalogue';
+import ResourceDetail from './pages/ResourceDetail';
 
 function App() {
   return (
@@ -35,9 +37,15 @@ function App() {
             path="/catalogue"
             element={
               <ProtectedRoute>
-                <main className="max-w-6xl mx-auto p-6">
-                  <h1 className="text-2xl font-bold">Student Catalogue</h1>
-                </main>
+                <Catalogue />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resources/:id"
+            element={
+              <ProtectedRoute>
+                <ResourceDetail />
               </ProtectedRoute>
             }
           />

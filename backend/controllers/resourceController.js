@@ -1,13 +1,33 @@
 const mongoose = require('mongoose');
 const Resource = require('../models/Resource');
+const CatalogueQueryService = require('../services/catalogueQueryService');
 const { validateResourceInput } = require('../utils/resourceValidator');
 
-const getPublishedCatalogueStub = async (_req, res) => {
+const searchPublishedCatalogue = async (req, res) => {
   try {
-    const published = await Resource.find({ status: 'Published' }).sort({ updatedAt: -1 });
-    return res.status(200).json(published);
+    const { q, studyArea, format } = req.query;
+    const resources = await CatalogueQueryService.searchPublishedResources({
+      q,
+      studyArea,
+      format,
+    });
+    return res.status(200).json(resources);
   } catch (error) {
-    return res.status(500).json({ message: 'Unable to load published catalogue.' });
+    return res.status(500).json({ message: 'Unable to search published catalogue.' });
+  }
+};
+
+const getPublishedResourceDetail = async (req, res) => {
+  try {
+    const resource = await CatalogueQueryService.getPublishedResourceById(req.params.id);
+    if (!resource) {
+      return res.status(404).json({
+        message: 'This resource is not available in the student catalogue.',
+      });
+    }
+    return res.status(200).json(resource);
+  } catch (error) {
+    return res.status(500).json({ message: 'Unable to load resource details.' });
   }
 };
 
@@ -123,7 +143,8 @@ const publishResource = async (req, res) => {
 };
 
 module.exports = {
-  getPublishedCatalogueStub,
+  searchPublishedCatalogue,
+  getPublishedResourceDetail,
   getManagedResources,
   createResource,
   updateResource,
