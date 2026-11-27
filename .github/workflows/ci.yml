@@ -23,5 +23,16 @@ jobs:
       - name: Install backend dependencies
         run: npm install --prefix backend
 
-      - name: Run automated API verification suite
+      - name: Run backend verification suite (T1-T6)
         run: npm test --prefix backend
+
+      - name: Install frontend dependencies
+        run: npm install --prefix frontend --legacy-peer-deps
+
+      - name: Run frontend UI & accessibility tests (T7)
+        env:
+          CI: true
+        run: npm test --prefix frontend -- --watchAll=false
+
+      - name: Verify production React build
+        run: npm run build --prefix frontend

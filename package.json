@@ -6,7 +6,9 @@
     "install-all": "npm install && npm install --prefix backend && npm install --prefix frontend --legacy-peer-deps",
     "start": "concurrently \"npm run prod --prefix backend\" \"npm start --prefix frontend\"",
     "dev": "concurrently \"npm run dev --prefix backend\" \"npm start --prefix frontend\"",
-    "test": "npm test --prefix backend",
+    "test": "npm test --prefix backend && CI=true npm test --prefix frontend -- --watchAll=false",
+    "test:backend": "npm test --prefix backend",
+    "test:frontend": "CI=true npm test --prefix frontend -- --watchAll=false",
     "build": "npm run build --prefix frontend",
     "seed": "npm run seed --prefix backend"
   },
