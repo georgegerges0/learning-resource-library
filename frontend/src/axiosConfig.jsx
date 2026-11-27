@@ -2,8 +2,14 @@ import axios from 'axios';
 
 const STORAGE_KEY = 'kadidjiny_auth_user';
 
+const defaultBaseUrl =
+  process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5001';
+
 const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5001',
+  baseURL:
+    process.env.REACT_APP_API_URL !== undefined
+      ? process.env.REACT_APP_API_URL
+      : defaultBaseUrl,
   headers: { 'Content-Type': 'application/json' },
 });
 
