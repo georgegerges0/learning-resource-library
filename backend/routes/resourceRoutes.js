@@ -7,6 +7,7 @@ const {
   createResource,
   updateResource,
   publishResource,
+  archiveResource,
 } = require('../controllers/resourceController');
 
 const router = express.Router();
@@ -17,8 +18,6 @@ router.get('/:id', protect, getPublishedResourceDetail);
 router.post('/', protect, requireAdmin, createResource);
 router.put('/:id', protect, requireAdmin, updateResource);
 router.patch('/:id/publish', protect, requireAdmin, publishResource);
-router.patch('/:id/archive', protect, requireAdmin, (_req, res) => {
-  return res.status(501).json({ message: 'Resource withdrawal pending LRL-25 implementation.' });
-});
+router.patch('/:id/archive', protect, requireAdmin, archiveResource);
 
 module.exports = router;

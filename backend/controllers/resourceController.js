@@ -142,6 +142,29 @@ const publishResource = async (req, res) => {
   }
 };
 
+// DC2: Retain archived Resource and Bookmark records while withdrawing Student access
+const archiveResource = async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).json({ message: 'Resource not found.' });
+  }
+
+  try {
+    const resource = await Resource.findById(id);
+    if (!resource) {
+      return res.status(404).json({ message: 'Resource not found.' });
+    }
+
+    resource.status = 'Archived';
+    resource.archivedAt = new Date();
+    const archived = await resource.save();
+
+    return res.status(200).json(archived);
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to archive resource.' });
+  }
+};
+
 module.exports = {
   searchPublishedCatalogue,
   getPublishedResourceDetail,
@@ -149,4 +172,5 @@ module.exports = {
   createResource,
   updateResource,
   publishResource,
+  archiveResource,
 };
