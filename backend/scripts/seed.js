@@ -7,8 +7,8 @@ const Bookmark = require('../models/Bookmark');
 dotenv.config();
 mongoose.set('strictQuery', true);
 
-const DEMO_ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || 'admin@kadidjiny.edu.au';
-const DEMO_ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'AdminPass123!';
+const DEMO_ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || 'educator@kadidjiny.edu.au';
+const DEMO_ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'EducatorPass123!';
 const DEMO_STUDENT_EMAIL = process.env.SEED_STUDENT_EMAIL || 'student@kadidjiny.edu.au';
 const DEMO_STUDENT_PASSWORD = process.env.SEED_STUDENT_PASSWORD || 'StudentPass123!';
 
@@ -87,13 +87,13 @@ const runSeed = async () => {
   let admin = await User.findOne({ email: DEMO_ADMIN_EMAIL });
   if (!admin) {
     admin = await User.create({
-      name: 'Ada Librarian (Admin)',
+      name: 'Dr Ada Mercer (Educator)',
       email: DEMO_ADMIN_EMAIL,
       password: DEMO_ADMIN_PASSWORD,
-      role: 'admin',
+      role: 'educator',
       university: 'Queensland University of Technology',
     });
-    console.log(`Created Administrator account: ${DEMO_ADMIN_EMAIL}`);
+    console.log(`Created Educator account: ${DEMO_ADMIN_EMAIL}`);
   }
 
   let student = await User.findOne({ email: DEMO_STUDENT_EMAIL });

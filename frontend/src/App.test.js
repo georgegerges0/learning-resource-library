@@ -62,7 +62,7 @@ describe('T7 · Kadidjiny Library UI States, Role Guard & Form Entry Preservatio
     );
 
     expect(screen.getByText(/403 · Access Denied/i)).toBeInTheDocument();
-    expect(screen.getByText(/Administrator permissions required/i)).toBeInTheDocument();
+    expect(screen.getByText(/Educator permissions required/i)).toBeInTheDocument();
     expect(screen.queryByText('Secret Admin Panel')).not.toBeInTheDocument();
   });
 

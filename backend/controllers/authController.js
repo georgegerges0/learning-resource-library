@@ -58,7 +58,7 @@ const registerUser = async (req, res) => {
       name: String(name).trim(),
       email: normalizedEmail,
       password: String(password),
-      role: allowAdminBootstrap ? 'admin' : 'student',
+      role: allowAdminBootstrap ? 'educator' : 'student',
     });
 
     return res.status(201).json({

@@ -39,9 +39,9 @@ const requireAdmin = (req, res, next) => {
       message: 'Authentication required. Please sign in to continue.',
     });
   }
-  if (req.user.role !== 'admin') {
+  if (req.user.role !== 'educator' && req.user.role !== 'admin') {
     return res.status(403).json({
-      message: 'Access denied. Administrator role is required to modify catalogue records.',
+      message: 'Access denied. Educator role is required to modify catalogue records.',
     });
   }
   return next();

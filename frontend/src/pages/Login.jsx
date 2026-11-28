@@ -20,7 +20,7 @@ const Login = () => {
     try {
       const response = await axiosInstance.post('/api/auth/login', formData);
       login(response.data);
-      navigate(response.data.role === 'admin' ? '/admin' : '/catalogue');
+      navigate((response.data.role === 'educator' || response.data.role === 'admin') ? '/admin' : '/catalogue');
     } catch (error) {
       const data = error.response?.data;
       if (data?.fieldErrors) {
