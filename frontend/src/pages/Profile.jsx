@@ -79,7 +79,7 @@ const Profile = () => {
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-slate-900">Account profile</h1>
           <span className="px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide rounded-full bg-slate-100 text-slate-800 border border-slate-300">
-            {user?.role === 'admin' ? 'Administrator' : 'Student'}
+            {(user?.role === 'educator' || user?.role === 'admin') ? 'Educator' : 'Student'}
           </span>
         </div>
 

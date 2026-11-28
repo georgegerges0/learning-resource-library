@@ -180,7 +180,7 @@ const AdminResources = () => {
       <div className="mb-6 flex flex-wrap justify-between items-end gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">
-            Administrator · Catalogue Management
+            Educator · Catalogue Management
           </p>
           <h1 className="text-2xl font-bold text-slate-900 mt-1">
             Resource details, preview and publication

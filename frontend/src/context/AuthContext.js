@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const isAdmin = Boolean(user && user.role === 'admin');
+  const isAdmin = Boolean(user && (user.role === 'educator' || user.role === 'admin'));
   const isStudent = Boolean(user && user.role === 'student');
 
   return (

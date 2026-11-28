@@ -15,7 +15,7 @@ const AccessDenied = () => {
           403 · Access Denied
         </span>
         <h1 className="text-2xl font-bold text-slate-900 mb-2">
-          Administrator permissions required
+          Educator permissions required
         </h1>
         <p className="text-slate-600 mb-6">
           You are signed in as <strong>{user?.name || 'a Student'}</strong> ({user?.role || 'student'}).

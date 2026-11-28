@@ -37,7 +37,7 @@ const Navbar = () => {
                   : 'bg-sky-500/20 text-sky-200 border-sky-400/40'
               }`}
             >
-              {isAdmin ? 'Administrator' : 'Student'}
+              {isAdmin ? 'Educator' : 'Student'}
             </span>
           )}
         </div>

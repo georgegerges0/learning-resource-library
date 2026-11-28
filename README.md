@@ -22,7 +22,7 @@ The system follows a three-tier architecture aligned with the SysML Block Defini
 1. **React Client (`frontend/`)**:
    - Role-aware single-page interface built with React 18, React Router v6, and Tailwind CSS.
    - **Student views**: `Catalogue` (keyword search + combined `Study area` and `Format` filters + `Reset filters` empty state), `ResourceDetail`, and `MyLibrary` (owner-scoped saved reading list).
-   - **Administrator views**: `AdminResources` (management table paired with draft/publish metadata form, inline per-field validation preserving valid entries, live `Catalogue preview` card, and keyboard-accessible `ArchiveModal` withdrawal dialog) plus `AccessDenied` (`403`) role guard view.
+   - **Educator views**: `AdminResources` (management table paired with draft/publish metadata form, inline per-field validation preserving valid entries, live `Catalogue preview` card, and keyboard-accessible `ArchiveModal` withdrawal dialog) plus `AccessDenied` (`403`) role guard view.
    - Keyboard accessibility (`T7`): skip-to-content navigation, semantic `<label>` bindings, `aria-invalid`/`aria-describedby` inline field errors, `aria-live="polite"` feedback banners, and `StatusBadge` components pairing colour with text.
 
 2. **Express REST API (`backend/`)**:
@@ -86,7 +86,7 @@ CLIENT_ORIGIN=http://localhost:3000
 npm run seed
 ```
 This creates idempotent demo accounts and sample engineering/health/research resources:
-- **Administrator**: `admin@kadidjiny.edu.au` / `AdminPass123!`
+- **Educator**: `educator@kadidjiny.edu.au` / `EducatorPass123!`
 - **Student**: `student@kadidjiny.edu.au` / `StudentPass123!`
 
 ### 4. Start Application & Run Automated Verification
@@ -150,7 +150,7 @@ npm test
 
 5. **Post-Deployment Verification (`T1`–`T6`)**:
    - `GET http://13.239.32.83/api/health` → `{"status":"ok","service":"Kadidjiny Library API"}` (`200 OK`).
-   - Verified Administrator (`admin@kadidjiny.edu.au` → 5 Published + 1 Draft in `/admin`) and Student (`student@kadidjiny.edu.au` → 5 Published in `/catalogue`, `Health + Video` combined filter = 1 match, persistent `My Library` bookmark across `pm2 restart kadidjiny-library`).
+   - Verified Educator (`educator@kadidjiny.edu.au` → 5 Published + 1 Draft in `/admin`) and Student (`student@kadidjiny.edu.au` → 5 Published in `/catalogue`, `Health + Video` combined filter = 1 match, persistent `My Library` bookmark across `pm2 restart kadidjiny-library`).
 
 ---
 

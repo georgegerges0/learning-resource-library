@@ -66,7 +66,7 @@ describe('T1 · S1 Role Guard & Authentication Permissions (LRL-7)', function ()
       });
 
     expect(writeRes.status).to.equal(403);
-    expect(writeRes.body.message).to.match(/Administrator/i);
+    expect(writeRes.body.message).to.match(/Educator/i);
 
     const manageRes = await request(app)
       .get('/api/resources/manage')
@@ -74,7 +74,7 @@ describe('T1 · S1 Role Guard & Authentication Permissions (LRL-7)', function ()
     expect(manageRes.status).to.equal(403);
   });
 
-  it('allows an authorised Administrator past the role guard', async () => {
+  it('allows an authorised Educator past the role guard', async () => {
     await User.create({
       name: 'Ada Librarian',
       email: 'ada.admin@qut.edu.au',
